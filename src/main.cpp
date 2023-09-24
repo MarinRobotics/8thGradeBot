@@ -8,13 +8,13 @@
  * "I was pressed!" and nothing.
  */
 void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
+  static bool pressed = false;
+  pressed = !pressed;
+  if (pressed) {
+    pros::lcd::set_text(2, "I was pressed!");
+  } else {
+    pros::lcd::clear_line(2);
+  }
 }
 
 /**
@@ -24,10 +24,10 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
+  pros::lcd::initialize();
+  pros::lcd::set_text(1, "Hello PROS User!");
 
-	pros::lcd::register_btn1_cb(on_center_button);
+  pros::lcd::register_btn1_cb(on_center_button);
 }
 
 /**
@@ -74,34 +74,37 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
- float power_multiplier = 0.75;
+float power_multiplier = 0.75;
 void opcontrol() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_front(1);
-	pros::Motor left_back(2);
-	pros::Motor right_front(3,true);
-	pros::Motor right_back(4, true);
-	pros::Motor arm(5);
+  pros::Controller master(pros::E_CONTROLLER_MASTER);
+  pros::Motor left_front(1);
+  pros::Motor left_back(2);
+  pros::Motor right_front(3, true);
+  pros::Motor right_back(4, true);
+  pros::Motor arm(5);
+  pros::Motor arm(6);
+  pros::Motor arm(7);
+  while (true)
 
-	while (true) {
-		
-		int right_power= 0.5 * master.get_analog(ANALOG_RIGHT_Y);
-		int left_power= 0.5 * master.get_analog(ANALOG_LEFT_Y);
-		int arm_power= 100;
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+	 if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
 
+      int right_power = 0.5 * master.get_analog(ANALOG_RIGHT_Y);
+  int left_power = 0.5 * master.get_analog(ANALOG_LEFT_Y);
+  int arm_power = 100;
 
-		right_front = right_power;
-		right_back = right_power;
-		left_front = left_power;
-		left_back = left_power;
-		
-		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
-			arm = arm_power;
-		} else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
-			arm = -arm_power;
-		} else {
-			arm = 0;
-		}
-		pros::delay(20);
-	}
+  right_front = right_power;
+  right_back = right_power;
+  left_front = left_power;
+  left_back = left_power;
+
+  if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+    arm = arm_power;
+  } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+    arm = -arm_power;
+  } else {
+    arm = 0;
+  }
+  pros::delay(20);
+}
 }
