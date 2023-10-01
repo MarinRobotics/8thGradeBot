@@ -27,14 +27,12 @@ void on_center_button()
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
+
 void initialize()
 {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
+	pros::Motor left_sweeper_initializer(6, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 }
-
 /**
  * Runs while the robot is in the disabled state of Field Management System or
  * the VEX Competition Switch, following either autonomous or opcontrol. When
@@ -88,20 +86,62 @@ void opcontrol()
 	pros::Motor right_front(3, true);
 	pros::Motor right_back(4, true);
 	pros::Motor arm(5);
-	pros::Motor right_sweeper(6);
-	pros::Motor left_sweeper(7);
+	pros::Motor left_sweeper(6);
+	pros::Motor right_sweeper(7);
+	bool r2 = master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
+	bool toggle = false;
+	bool latch = false;
+	pros::lcd::print(1, "i like pizza");
+	pros::lcd::set_text(2, "I was pressed!");
 	while (true)
 	{
-		int arm_power = 100;
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+/*
+		if (toggle)
 		{
-			// TODO set limits to not smack the base
-			right_sweeper = arm_power;
+			right_sweeper.move_absolute(90, -100);
+		}
+		else
+		{
+			right_sweeper.move_absolute(0, 100);
 		}
 
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
+		if (r2)
 		{
-			left_sweeper = -arm_power;
+			if (!latch)
+			{ // if latch is false, flip toggle one time and set latch to true
+				toggle = !toggle;
+				latch = true;
+				pros::lcd::print(1, "i like pizza");
+			}
+		}
+		else
+		{
+			latch = false; // once button is released then release the latch too
+		}
+*/
+		int arm_power = 100;
+		
+				if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
+				{
+					// TODO set limits to not smack the base
+					left_sweeper.move_absolute(90, -100);
+					pros::lcd::print(1, "i like pizza");
+				}
+				else
+				{
+					left_sweeper.move_absolute(0, 100);
+					pros::lcd::print(1, "im very off");
+				}
+		
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+		{
+			right_sweeper.move_absolute(90, -100);
+			pros::lcd::print(1, "i like pizza");
+		}
+		else
+		{
+			right_sweeper.move_absolute(0, 100);
+			pros::lcd::print(1, "im very off");
 		}
 
 		int right_power = 0.5 * master.get_analog(ANALOG_RIGHT_Y);
@@ -124,6 +164,5 @@ void opcontrol()
 		{
 			arm = 0;
 		}
-		pros::delay(20);
 	}
 }
