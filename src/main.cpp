@@ -30,6 +30,9 @@ void on_center_button()
 
 void initialize()
 {
+
+    pros::lcd::initialize();
+
 	pros::Motor left_sweeper_initializer(6, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 }
@@ -88,30 +91,29 @@ void opcontrol()
 	pros::Motor arm(5);
 	pros::Motor left_sweeper(6);
 	pros::Motor right_sweeper(7);
-	bool r2 = master.get_digital(pros::E_CONTROLLER_DIGITAL_R2);
 	bool toggle = false;
 	bool latch = false;
-	pros::lcd::print(1, "i like pizza");
-	pros::lcd::set_text(2, "I was pressed!");
+	pros::lcd::set_text(2, "starting");
 	while (true)
 	{
 /*
 		if (toggle)
 		{
-			right_sweeper.move_absolute(90, -100);
+			right_sweeper.move_absolute(0, 100);
+
 		}
 		else
 		{
 			right_sweeper.move_absolute(0, 100);
+
 		}
 
-		if (r2)
+		if ( master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 		{
 			if (!latch)
 			{ // if latch is false, flip toggle one time and set latch to true
 				toggle = !toggle;
 				latch = true;
-				pros::lcd::print(1, "i like pizza");
 			}
 		}
 		else
@@ -120,19 +122,19 @@ void opcontrol()
 		}
 */
 		int arm_power = 100;
-		
-				if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
-				{
-					// TODO set limits to not smack the base
-					left_sweeper.move_absolute(90, -100);
-					pros::lcd::print(1, "i like pizza");
-				}
-				else
-				{
-					left_sweeper.move_absolute(0, 100);
-					pros::lcd::print(1, "im very off");
-				}
-		
+
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
+		{
+			// TODO set limits to not smack the base
+			left_sweeper.move_absolute(90, -100);
+
+		}
+		else
+		{
+			left_sweeper.move_absolute(0, 100);
+
+		}
+
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 		{
 			right_sweeper.move_absolute(90, -100);
@@ -144,8 +146,8 @@ void opcontrol()
 			pros::lcd::print(1, "im very off");
 		}
 
-		int right_power = 0.5 * master.get_analog(ANALOG_RIGHT_Y);
-		int left_power = 0.5 * master.get_analog(ANALOG_LEFT_Y);
+		int right_power = 0.75 * master.get_analog(ANALOG_RIGHT_Y);
+		int left_power = 0.75 * master.get_analog(ANALOG_LEFT_Y);
 
 		right_front = right_power;
 		right_back = right_power;
