@@ -31,12 +31,15 @@ void on_center_button()
 void initialize()
 {
 
-    pros::lcd::initialize();
+	pros::lcd::initialize();
+	pros::lcd::set_text(1, "we did it");
 
 	pros::Motor left_sweeper_initializer(6, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
-	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);	 
+
+	pros::delay(100);
 }
-/**
+	/**
  * Runs while the robot is in the disabled state of Field Management System or
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
@@ -96,53 +99,52 @@ void opcontrol()
 	pros::lcd::set_text(2, "starting");
 	while (true)
 	{
-/*
-		if (toggle)
-		{
-			right_sweeper.move_absolute(0, 100);
+		/*
+				if (toggle)
+				{
+					right_sweeper.move_absolute(0, 100);
 
-		}
-		else
-		{
-			right_sweeper.move_absolute(0, 100);
+				}
+				else
+				{
+					right_sweeper.move_absolute(0, 100);
 
-		}
+				}
 
-		if ( master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-		{
-			if (!latch)
-			{ // if latch is false, flip toggle one time and set latch to true
-				toggle = !toggle;
-				latch = true;
-			}
-		}
-		else
-		{
-			latch = false; // once button is released then release the latch too
-		}
-*/
+				if ( master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+				{
+					if (!latch)
+					{ // if latch is false, flip toggle one time and set latch to true
+						toggle = !toggle;
+						latch = true;
+					}
+				}
+				else
+				{
+					latch = false; // once button is released then release the latch too
+				}
+		*/
 		int arm_power = 100;
 
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
 		{
 			// TODO set limits to not smack the base
 			left_sweeper.move_absolute(90, -100);
-
+			pros::lcd::print(1, "work");
 		}
 		else
 		{
 			left_sweeper.move_absolute(0, 100);
-
 		}
 
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 		{
-			right_sweeper.move_absolute(90, -100);
+			right_sweeper.move_absolute(90, -115);
 			pros::lcd::print(1, "i like pizza");
 		}
-		else
+        else
 		{
-			right_sweeper.move_absolute(0, 100);
+			right_sweeper.move_absolute(0, 115);
 			pros::lcd::print(1, "im very off");
 		}
 
