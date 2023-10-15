@@ -35,11 +35,15 @@ void initialize()
 	pros::lcd::set_text(1, "we did it");
 
 	pros::Motor left_sweeper_initializer(6, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
-	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);	 
+	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 
-	pros::delay(100);
+	pros::Motor wallright_initializer(8, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor wallleft_initializer(9, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
+
+
+	pros::delay(100);	
 }
-	/**
+/**
  * Runs while the robot is in the disabled state of Field Management System or
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
@@ -70,6 +74,12 @@ void competition_initialize() {}
  */
 void autonomous() {}
 
+bool myPrint(int16_t line, const char *fmt)
+{
+	pros::lcd::print(line, fmt);
+	pros::delay(20);
+}
+
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -94,9 +104,13 @@ void opcontrol()
 	pros::Motor arm(5);
 	pros::Motor left_sweeper(6);
 	pros::Motor right_sweeper(7);
+	pros::Motor wallright(8);
+	pros::Motor wallleft(9);
 	bool toggle = false;
 	bool latch = false;
-	pros::lcd::set_text(2, "starting");
+	// myPrint(3, "starting");
+	pros::lcd::print(2, "starting");
+	// pros::delay(20);
 	while (true)
 	{
 		/*
@@ -139,13 +153,41 @@ void opcontrol()
 
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 		{
+			bool latch = true;
 			right_sweeper.move_absolute(90, -115);
-			pros::lcd::print(1, "i like pizza");
+			pros::lcd::print(0, "i like pizza");
+			pros::delay(20);
 		}
-        else
+		else
 		{
 			right_sweeper.move_absolute(0, 115);
-			pros::lcd::print(1, "im very off");
+			pros::lcd::print(0, "off");
+			pros::delay(20);
+		}
+
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
+		{
+			wallright.move_absolute(75,110);
+			wallleft.move_absolute(75,110);
+			pros::lcd::print(5, "wall up");
+			pros::delay(20);
+		}
+
+
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
+		{
+			wallright.move_absolute(0,35);
+			wallleft.move_absolute(0,35);
+			pros::lcd::print(5, "wall down");
+			pros::delay(20);
+		}
+
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
+		{
+			wallright.move_absolute(50,110);					
+			wallleft.move_absolute(50,110);
+			pros::lcd::print(5, "wall up");
+			pros::delay(20);
 		}
 
 		int right_power = 0.75 * master.get_analog(ANALOG_RIGHT_Y);
