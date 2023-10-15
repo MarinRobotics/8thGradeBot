@@ -97,10 +97,10 @@ float power_multiplier = 0.75;
 void opcontrol()
 {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_front(1);
-	pros::Motor left_back(2);
-	pros::Motor right_front(3, true);
-	pros::Motor right_back(4, true);
+	pros::Motor left_front(4);
+	pros::Motor left_back(3);
+	pros::Motor right_front(2, true);
+	pros::Motor right_back(1, true);
 	pros::Motor arm(5);
 	pros::Motor left_sweeper(6);
 	pros::Motor right_sweeper(7);
