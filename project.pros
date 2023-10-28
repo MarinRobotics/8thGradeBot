@@ -310,7 +310,7 @@
     },
     "upload_options": {
       "icon": "clawbot",
-      "after": "none"
+      "after": "screen"
     }
   }
 }
