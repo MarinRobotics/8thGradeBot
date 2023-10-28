@@ -7,18 +7,14 @@
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
-void on_center_button()
-{
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed)
-	{
-		pros::lcd::set_text(2, "I was pressed!");
-	}
-	else
-	{
-		pros::lcd::clear_line(2);
-	}
+void on_center_button() {
+  static bool pressed = false;
+  pressed = !pressed;
+  if (pressed) {
+    pros::lcd::set_text(2, "I was pressed!");
+  } else {
+    pros::lcd::clear_line(2);
+  }
 }
 
 /**
@@ -28,11 +24,11 @@ void on_center_button()
  * to keep execution time for this mode under a few seconds.
  */
 
-void initialize()
-{
+void initialize() {
 
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "we did it");
+    pros::lcd::initialize();
 
 	pros::Motor left_sweeper_initializer(6, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
@@ -74,12 +70,6 @@ void competition_initialize() {}
  */
 void autonomous() {}
 
-bool myPrint(int16_t line, const char *fmt)
-{
-	pros::lcd::print(line, fmt);
-	pros::delay(20);
-}
-
 /**
  * Runs the operator control code. This function will be started in its own task
  * with the default priority and stack size whenever the robot is enabled via
@@ -94,36 +84,38 @@ bool myPrint(int16_t line, const char *fmt)
  * task, not resume it from where it left off.
  */
 float power_multiplier = 0.75;
-void opcontrol()
-{
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_front(4);
-	pros::Motor left_back(3);
-	pros::Motor right_front(2, true);
-	pros::Motor right_back(1, true);
-	pros::Motor arm(5);
-	pros::Motor left_sweeper(6);
-	pros::Motor right_sweeper(7);
-	pros::Motor wallright(8);
-	pros::Motor wallleft(9);
-	bool toggle = false;
-	bool latch = false;
+void opcontrol() {
+  pros::Controller master(pros::E_CONTROLLER_MASTER);
+  pros::Motor left_front(4);
+  pros::Motor left_back(3);
+  pros::Motor right_front(2, true);
+  pros::Motor right_back(1, true);
+  pros::Motor arm(5);
+  pros::Motor left_sweeper(6);
+  pros::Motor right_sweeper(7);
+  pros::Motor left_wall(8);
+  pros::Motor right_wall(9);   
+
+  pros::Motor wallright(8);
+  pros::Motor wallleft(9);
+
+  bool toggle = false;
+  bool latch = false;
 	// myPrint(3, "starting");
-	pros::lcd::print(2, "starting");
+  pros::lcd::print(2, "starting");
 	// pros::delay(20);
-	while (true)
-	{
-		/*
-				if (toggle)
-				{
-					right_sweeper.move_absolute(0, 100);
+  while (true) {
+    		/*
+		                    if (toggle)
+		                    {
+		                            right_sweeper.move_absolute(0, 100);
 
-				}
-				else
-				{
-					right_sweeper.move_absolute(0, 100);
+		                    }
+		                    else
+		                    {
+		                            right_sweeper.move_absolute(0, 100);
 
-				}
+		                    }
 
 				if ( master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 				{
@@ -138,77 +130,97 @@ void opcontrol()
 					latch = false; // once button is released then release the latch too
 				}
 		*/
-		int arm_power = 100;
-
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
-		{
-			// TODO set limits to not smack the base
-			left_sweeper.move_absolute(90, -100);
-			pros::lcd::print(1, "work");
+	int arm_power = 100;
+	if ( master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+		if (!latch) { // if latch is false, flip toggle one time and set latch to true 
+			toggle = !toggle; latch = true;
 		}
-		else
-		{
-			left_sweeper.move_absolute(0, 100);
-		}
+	} else {
+		latch = false; // once button is released then release the latch too
+	}
 
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
+	{
+		// TODO set limits to not smack the base
+		left_sweeper.move_absolute(90, -100);
+		pros::lcd::print(1, "work");
+	}
+	else
+	{
+		left_sweeper.move_absolute(0, 100);
+	}
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+      // TODO set limits to not smack the base
+      left_sweeper.move_absolute(90, -100);
+
+    } else {
+      left_sweeper.move_absolute(0, 100);
+    }
+
+	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
 		{
 			bool latch = true;
 			right_sweeper.move_absolute(90, -115);
 			pros::lcd::print(0, "i like pizza");
 			pros::delay(20);
 		}
-		else
-		{
-			right_sweeper.move_absolute(0, 115);
-			pros::lcd::print(0, "off");
-			pros::delay(20);
-		}
-
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
-		{
-			wallright.move_absolute(75,110);
-			wallleft.move_absolute(75,110);
-			pros::lcd::print(5, "wall up");
-			pros::delay(20);
-		}
-
-
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
-		{
-			wallright.move_absolute(0,35);
-			wallleft.move_absolute(0,35);
-			pros::lcd::print(5, "wall down");
-			pros::delay(20);
-		}
-
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
-		{
-			wallright.move_absolute(50,110);					
-			wallleft.move_absolute(50,110);
-			pros::lcd::print(5, "wall up");
-			pros::delay(20);
-		}
-
-		int right_power = 0.75 * master.get_analog(ANALOG_RIGHT_Y);
-		int left_power = 0.75 * master.get_analog(ANALOG_LEFT_Y);
-
-		right_front = right_power;
-		right_back = right_power;
-		left_front = left_power;
-		left_back = left_power;
-
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
-		{
-			arm = arm_power;
-		}
-		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
-		{
-			arm = -arm_power;
-		}
-		else
-		{
-			arm = 0;
-		}
+	else
+	{
+		right_sweeper.move_absolute(0, 115);
+		pros::lcd::print(0, "off");
+		pros::delay(20);
 	}
+
+	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
+	{
+		wallright.move_absolute(75,110);
+		wallleft.move_absolute(75,110);
+		pros::lcd::print(5, "wall up");
+		pros::delay(20);
+	}
+
+
+	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
+	{
+		wallright.move_absolute(0,35);
+		wallleft.move_absolute(0,35);
+		pros::lcd::print(5, "wall down");
+		pros::delay(20);
+	}
+
+	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
+	{
+		wallright.move_absolute(50,110);					
+		wallleft.move_absolute(50,110);
+		pros::lcd::print(5, "wall up");
+		pros::delay(20);
+	}
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+      right_sweeper.move_absolute(90, -100);
+      pros::lcd::print(1, "i like pizza");
+    } else {
+      right_sweeper.move_absolute(0, 100);
+      pros::lcd::print(1, "im very off");
+    }
+
+    int right_power = 0.75 * master.get_analog(ANALOG_RIGHT_Y);
+    int left_power = 0.75 * master.get_analog(ANALOG_LEFT_Y);
+
+    right_front = right_power;
+    right_back = right_power;
+    left_front = left_power;
+    left_back = left_power;
+
+    if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+      arm = arm_power;
+    } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+      arm = -arm_power;
+    } else {
+      arm = 0;
+    }
+
+	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
+			
+	}
+  }
 }
