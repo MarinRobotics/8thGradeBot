@@ -28,9 +28,14 @@ void initialize() {
 
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "we did it");
-    pros::lcd::initialize();
 
-	pros::delay(100);	
+	pros::Motor left_sweeper_initializer(6, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
+
+	pros::Motor wallright_initializer(8, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor wallleft_initializer(9, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
+
+	pros::delay(100);
 }
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -91,31 +96,93 @@ void opcontrol() {
 
 	pros::Motor wallright(8);
 	pros::Motor wallleft(9);
+	bool toggle = false;
 
-	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
+	// myPrint(3, "starting");
+	pros::lcd::print(2, "starting");
+	// pros::delay(20);
+	while (true)
 	{
-		wallright.move_absolute(75,110);
-		wallleft.move_absolute(75,110);
-		pros::lcd::print(5, "wall up");
-		pros::delay(20);
-	}
+		/*
+				if (toggle)
+				{
+					right_sweeper.move_absolute(0, 100);
 
+				}
+				else
+				{
+					right_sweeper.move_absolute(0, 100);
 
-	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
-	{
-		wallright.move_absolute(0,35);
-		wallleft.move_absolute(0,35);
-		pros::lcd::print(5, "wall down");
-		pros::delay(20);
-	}
+				}
 
-	if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
-	{
-		wallright.move_absolute(50,110);					
-		wallleft.move_absolute(50,110);
-		pros::lcd::print(5, "wall up");
-		pros::delay(20);
-	}
+				if ( master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+				{
+					if (!latch)
+					{ // if latch is false, flip toggle one time and set latch to true
+						toggle = !toggle;
+						latch = true;
+					}
+				}
+				else
+				{
+					latch = false; // once button is released then release the latch too
+				}
+		*/
+		int arm_power = 100;
+
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
+		{
+			toggle = !toggle;
+			if (toggle)
+			{
+				left_sweeper.move_absolute(75, 115);
+				pros::lcd::print(0, "i like pizza");
+			}
+			else
+			{
+				left_sweeper.move_absolute(0, 115);
+				pros::lcd::print(0, "off");
+			}
+		}
+
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+		{
+			toggle = !toggle;
+			if (toggle)
+			{
+				right_sweeper.move_absolute(85, -115);
+				pros::lcd::print(0, "i like pizza");
+			}
+			else
+			{
+				right_sweeper.move_absolute(0, 115);
+				pros::lcd::print(0, "off");
+			}
+		}
+
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
+		{
+			wallright.move_absolute(75, 110);
+			wallleft.move_absolute(75, 110);
+			pros::lcd::print(5, "wall up");
+			pros::delay(20);
+		}
+
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
+		{
+			wallright.move_absolute(0, 35);
+			wallleft.move_absolute(0, 35);
+			pros::lcd::print(5, "wall down");
+			pros::delay(20);
+		}
+
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
+		{
+			wallright.move_absolute(50, 110);
+			wallleft.move_absolute(50, 110);
+			pros::lcd::print(5, "wall up");
+			pros::delay(20);
+		}
 
 	int right_power = master.get_analog(ANALOG_RIGHT_Y);
 	int left_power = master.get_analog(ANALOG_LEFT_Y);
