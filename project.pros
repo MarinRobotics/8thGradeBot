@@ -309,8 +309,9 @@
       }
     },
     "upload_options": {
-      "icon": "clawbot",
-      "after": "screen"
+      "icon": "planet",
+      "after": "none",
+      "slot": 1
     }
   }
 }
