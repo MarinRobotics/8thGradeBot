@@ -94,16 +94,39 @@ float inchesToDegrees(float inches)
 	drivetrain.driveFor(reverse, 500, mm);
 	drivetrain.turnFor(right, 30, degrees, false);
 */
-const float ROBOT_DISTANCE_PER_DEGREE = (10.25 * M_PI) / 360.0 / 2;
+const float ROBOT_DISTANCE_PER_DEGREE = (10.25 * M_PI) / 360;
 void turn(pros::Motor_Group &left, pros::Motor_Group &right, float robot_turn_degrees)
 {
-	float motor_turn_degrees = ROBOT_DISTANCE_PER_DEGREE * robot_turn_degrees; /* calc from robot_turn_degrees */
-	left.move_absolute(motor_turn_degrees, 100);
-	right.move_absolute(motor_turn_degrees, 100);
+	std::vector<std::int32_t> start_draw = left.get_current_draws();
+	// use motor
+	float robot_turn_distance = ROBOT_DISTANCE_PER_DEGREE * robot_turn_degrees;
+	float motor_turn_degrees = inchesToDegrees(robot_turn_distance * 1.08);
+	left.move_relative(motor_turn_degrees, 100);
+	std::vector<double> start_pos = left.get_target_positions ( );
+	right.move_relative(-motor_turn_degrees, 100);
+
+	while (true)
+	{
+		pros::delay(10);
+		std::vector<double> current_draw = left.get_positions();
+		float delta = fabs(current_draw[0] - start_pos[0]);
+		std::cout << "current delta" << delta << "\n";
+		if (delta < 5)
+		{
+			break;
+		}
+	}
+}
+void move(pros::Motor_Group &motors, float distance)
+{
+	// get current draws
+	// use motor
+	motors.move_relative(inchesToDegrees(distance), 100);
+	// loop until current draws are close to get
 }
 
-void opcontrol()
-{
+void autonomous()
+{	
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 	pros::Motor left_front(4, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
@@ -125,33 +148,12 @@ void opcontrol()
 		right_front,
 		right_back,
 	});
-	while (true)
-	{
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
-		{
-			// turn(funny_left, funny_right, 90);
-			float motor_turn_degrees = ROBOT_DISTANCE_PER_DEGREE * 90; /* calc from robot_turn_degrees */
-			funny_left.move_relative(inchesToDegrees(12.56), 100);
-			//funny_right.move_relative(motor_turn_degrees, 100);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
-		{
-			// turn(funny_right, funny_left, -90);
-			float motor_turn_degrees = ROBOT_DISTANCE_PER_DEGREE * -90; /* calc from robot_turn_degrees */
-			funny_left.move_relative(inchesToDegrees(-12.56), 100);
-			// funny_right.move_relative(motor_turn_degrees, 100);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
-		{
-			funny.move_relative(inchesToDegrees(12.56), 100);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
-		{
-			funny.move_relative(inchesToDegrees(-12.56), 100);
-		}
-	}
-	funny.move_absolute(inchesToDegrees(12.56), 100);
-	turn(funny_left, funny_right, -45);
+
+	 turn(funny_left, funny_right, -90);
+	 turn(funny_left, funny_right, 90);
+	// move(funny, 12.56);
+	// move(funny, -12.56);
+
 	/*10.25
 
 	turn(funny_left, funny_right, -45);
