@@ -309,9 +309,9 @@
       }
     },
     "upload_options": {
-      "icon": "planet",
-      "after": "none",
-      "slot": 1
+      "icon": "X",
+      "after": "screen",
+      "slot": 3
     }
   }
 }
