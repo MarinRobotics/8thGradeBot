@@ -309,9 +309,9 @@
       }
     },
     "upload_options": {
-      "icon": "X",
+      "icon": "pizza",
       "after": "screen",
-      "slot": 3
+      "slot": 1
     }
   }
 }
