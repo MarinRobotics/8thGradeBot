@@ -206,11 +206,13 @@ void opcontrol()
 	pros::Motor right_wall(9);
 	pros::Motor wallright(8);
 	pros::Motor wallleft(9);
+	pros::Motor launcher(10,true);
 	pros::ADIDigitalOut piston('A');
 
 	bool toggle = false;
 	bool toggle2 = false;
 	bool air = false;
+	bool punch = false;
 	// myPrint(3, "starting");
 	pros::lcd::print(2, "starting");
 	// pros::delay(20);
@@ -242,7 +244,8 @@ void opcontrol()
 				}
 		*/
 		int arm_power = 100;
-
+		int launcher_power = 100;
+		int launcher_off = 0;
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
 		{
 			toggle = !toggle;
@@ -282,6 +285,18 @@ void opcontrol()
 			else
 			{
 				piston.set_value(false);
+			}
+		}
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
+		{
+			punch = !punch;
+			if (punch)
+			{
+				launcher = launcher_power;
+			}
+			else
+			{
+				launcher= launcher_off;
 			}
 		}
 		/*if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
