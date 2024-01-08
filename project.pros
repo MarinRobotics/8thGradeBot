@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "8thGradeBot.2",
+    "project_name": "8thGradeBot air",
     "target": "v5",
     "templates": {
       "kernel": {

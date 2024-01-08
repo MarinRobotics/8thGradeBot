@@ -1,4 +1,4 @@
-	#include "main.h"
+#include "main.h"
 #include "pros/misc.h"
 #define M_PI 3.14159265358979323846 /* pi */
 
@@ -30,7 +30,8 @@ void on_center_button()
  * to keep execution time for this mode under a few seconds.
  */
 
-void initialize() {
+void initialize()
+{
 
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "autono");
@@ -132,7 +133,7 @@ void opcontrol2()
 			// turn(funny_left, funny_right, 90);
 			float motor_turn_degrees = ROBOT_DISTANCE_PER_DEGREE * 90; /* calc from robot_turn_degrees */
 			funny_left.move_relative(inchesToDegrees(12.56), 100);
-			//funny_right.move_relative(motor_turn_degrees, 100);
+			// funny_right.move_relative(motor_turn_degrees, 100);
 		}
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
@@ -202,13 +203,14 @@ void opcontrol()
 	pros::Motor left_sweeper(6);
 	pros::Motor right_sweeper(7);
 	pros::Motor left_wall(8);
-	pros::Motor right_wall(9);   
+	pros::Motor right_wall(9);
 	pros::Motor wallright(8);
-	pros::Motor wallleft(9);	
+	pros::Motor wallleft(9);
 	pros::ADIDigitalOut piston('A');
 
 	bool toggle = false;
-
+	bool toggle2 = false;
+	bool air = false;
 	// myPrint(3, "starting");
 	pros::lcd::print(2, "starting");
 	// pros::delay(20);
@@ -258,8 +260,8 @@ void opcontrol()
 
 		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
 		{
-			toggle = !toggle;
-			if (toggle)
+			toggle2 = !toggle2;
+			if (toggle2)
 			{
 				left_sweeper.move_absolute(85, -115);
 				pros::lcd::print(0, "i like pizza");
@@ -270,22 +272,33 @@ void opcontrol()
 				pros::lcd::print(0, "off");
 			}
 		}
-
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
+		{
+			air = !air;
+			if (air)
+			{
+				piston.set_value(true);
+			}
+			else
+			{
+				piston.set_value(false);
+			}
+		}
+		/*if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
 		{
 
-			piston.set_value(true);
+			piston.set_value();
 			//pros::delay(1000);
 			//piston.set_value(false);
 
-			
+
 			//wallright.move_absolute(75, 110);
 			//wallleft.move_absolute(75, 110);
 			//pros::lcd::print(5, "wall up");
 			//pros::delay(20);
-			
-		}
 
+		}
+		*/
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN))
 		{
 
@@ -308,20 +321,24 @@ void opcontrol()
 		int right_power = master.get_analog(ANALOG_RIGHT_Y);
 		int left_power = master.get_analog(ANALOG_LEFT_Y);
 
-			right_front = right_power;
+		right_front = right_power;
 		right_back = right_power;
 		left_front = left_power;
 		left_back = left_power;
 
-		//int arm_power = 100;
+		// int arm_power = 100;
 
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-		arm = arm_power;
-		} else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-		arm = -arm_power;
-		} else {
-		arm = 0;
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
+		{
+			arm = arm_power;
 		}
-			
+		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
+		{
+			arm = -arm_power;
+		}
+		else
+		{
+			arm = 0;
+		}
 	}
-}		
+}
