@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "8thGradeBot air",
+    "project_name": "8thGradeBot hohoho",
     "target": "v5",
     "templates": {
       "kernel": {
@@ -311,7 +311,7 @@
     "upload_options": {
       "icon": "pizza",
       "after": "screen",
-      "slot": 1
+      "slot": 2
     }
   }
 }

@@ -34,7 +34,7 @@ void initialize()
 {
 
 	pros::lcd::initialize();
-	pros::lcd::set_text(1, "autono");
+	
 
 	pros::Motor left_sweeper_initializer(6, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
@@ -101,12 +101,14 @@ void turn(pros::Motor_Group &left, pros::Motor_Group &right, float robot_turn_de
 	float motor_turn_degrees = ROBOT_DISTANCE_PER_DEGREE * robot_turn_degrees; /* calc from robot_turn_degrees */
 	left.move_absolute(motor_turn_degrees, 100);
 	right.move_absolute(motor_turn_degrees, 100);
+	pros::lcd::set_text(1, "hmmmmm");
 }
 
-void opcontrol2()
+void autonomous()
 {
+	pros::lcd::set_text(1, "yeyyyy");
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-
+	pros::ADIDigitalOut piston('A');
 	pros::Motor left_front(4, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor left_back(3, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor right_front(2, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
@@ -126,34 +128,10 @@ void opcontrol2()
 		right_front,
 		right_back,
 	});
-	while (true)
-	{
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
-		{
-			// turn(funny_left, funny_right, 90);
-			float motor_turn_degrees = ROBOT_DISTANCE_PER_DEGREE * 90; /* calc from robot_turn_degrees */
-			funny_left.move_relative(inchesToDegrees(12.56), 100);
-			// funny_right.move_relative(motor_turn_degrees, 100);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
-		{
-			// turn(funny_right, funny_left, -90);
-			float motor_turn_degrees = ROBOT_DISTANCE_PER_DEGREE * -90; /* calc from robot_turn_degrees */
-			funny_left.move_relative(inchesToDegrees(-12.56), 100);
-			// funny_right.move_relative(motor_turn_degrees, 100);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
-		{
-			funny.move_relative(inchesToDegrees(12.56), 100);
-		}
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
-		{
-			funny.move_relative(inchesToDegrees(-12.56), 100);
-		}
-	}
-	funny.move_absolute(inchesToDegrees(12.56), 100);
+	
+	/*funny.move_absolute(inchesToDegrees(12.56), 100);
 	turn(funny_left, funny_right, -45);
-	/*10.25
+	10.25
 
 	turn(funny_left, funny_right, -45);
 
@@ -166,8 +144,18 @@ void opcontrol2()
 	funny.move_absolute(inchesToDegrees(-27.56), 100);
 	drivetrain.turnFor(right, 45, degrees);
 	funny.move_absolute(inchesToDegrees(-19.7), 100);
-	drivetrain.turnFor(right, 30, degrees, false);
-*/
+	drivetrain.*/
+
+	funny.move_absolute(inchesToDegrees(-80), 100);
+	pros::delay(2000);
+	turn(funny_left, funny_right, 90);
+	/*piston.set_value(true);
+	funny.move_absolute(inchesToDegrees(20), 100);
+	piston.set_value(false);
+	turn(funny_left, funny_right, -90);
+	funny.move_absolute(inchesToDegrees(60), 100);
+	turn(funny_left, funny_right, -90);
+	funny.move_absolute(inchesToDegrees(-45), 100);*/
 }
 
 bool myPrint(int16_t line, const char *fmt)
@@ -206,7 +194,7 @@ void opcontrol()
 	pros::Motor right_wall(9);
 	pros::Motor wallright(8);
 	pros::Motor wallleft(9);
-	pros::Motor launcher(10,true);
+	pros::Motor launcher(10, true);
 	pros::ADIDigitalOut piston('A');
 
 	bool toggle = false;
@@ -296,7 +284,7 @@ void opcontrol()
 			}
 			else
 			{
-				launcher= launcher_off;
+				launcher = launcher_off;
 			}
 		}
 		/*if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
