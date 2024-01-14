@@ -29,20 +29,32 @@ void on_center_button()
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-
+bool auto_offence = true;
 void initialize()
 {
 
 	pros::lcd::initialize();
-	
-
+	pros::ADIDigitalIn button('b');
+	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::Motor left_sweeper_initializer(6, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor right_sweeper_initializer(7, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 
 	pros::Motor wallright_initializer(8, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor wallleft_initializer(9, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor left_front_initializer(10, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
-
+	pros::lcd::print(0, "autonmode %s", auto_offence ? "offence" : "defence");
+	for (int i = 0; i < 3; i++)
+	{
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A) || button.get_value() == 1)
+		{
+			auto_offence = false;
+			pros::lcd::print(0, "setting to defence");
+			break;
+		}
+		pros::lcd::print(1, "%d", 3 - i);
+		pros::delay(1000);
+	}
+	pros::lcd::print(0, "final %s", auto_offence ? "offence" : "defence");
 	pros::delay(100);
 }
 /**
@@ -83,32 +95,81 @@ float inchesToDegrees(float inches)
 {
 	return inchesToRotations(inches) * 360.0;
 }
-/*
-	drivetrain.turnFor(left, -45, degrees);
-	drivetrain.driveFor(reverse, -700, mm);
-	drivetrain.turnFor(right, -45, degrees);
-	drivetrain.driveFor(reverse, -175, mm);
-	drivetrain.driveFor(forward, -200, mm);
-	drivetrain.turnFor(right, 45, degrees);
-	drivetrain.driveFor(reverse, 700, mm);
-	drivetrain.turnFor(right, 45, degrees);
-	drivetrain.driveFor(reverse, 500, mm);
-	drivetrain.turnFor(right, 30, degrees, false);
-*/
-const float ROBOT_DISTANCE_PER_DEGREE = (10.25 * M_PI) / 360.0 / 2;
+
+const float ROBOT_DISTANCE_PER_DEGREE = (10.25 * M_PI) / 360.0;
 void turn(pros::Motor_Group &left, pros::Motor_Group &right, float robot_turn_degrees)
 {
-	float motor_turn_degrees = ROBOT_DISTANCE_PER_DEGREE * robot_turn_degrees; /* calc from robot_turn_degrees */
-	left.move_absolute(motor_turn_degrees, 100);
-	right.move_absolute(motor_turn_degrees, 100);
-	pros::lcd::set_text(1, "hmmmmm");
-}
+	pros::lcd::print(0, "turning");
+	std::vector<double> targetPositions = left.get_positions();
+	float motor_turn_degrees = inchesToDegrees(ROBOT_DISTANCE_PER_DEGREE * robot_turn_degrees); /* calc from robot_turn_degrees */
 
-void autonomous()
+	std::vector<double> endPositions;
+	for (int i = 0; i < targetPositions.size(); i++)
+	{
+		pros::lcd::print(i, "end %d c: %4.2f t: %4.2f", i, targetPositions[i], motor_turn_degrees);
+		endPositions.push_back(targetPositions[i] + motor_turn_degrees);
+	}
+
+	left.move_relative(motor_turn_degrees, 100);
+	right.move_relative(-motor_turn_degrees, 100);
+
+	int attempts = 0;
+	bool stop = false;
+
+	while (!stop && attempts < 10)
+	{
+		std::vector<double> currentPositions = left.get_positions();
+		std::vector<double> target = left.get_target_positions();
+		for (int i = 0; i < currentPositions.size(); i++)
+		{
+			pros::lcd::print(2 + i, "turn %d c: %4.2f e: %4.2f g: %4.2f", i, currentPositions[i], endPositions[i], target[i]);
+			if (fabs(currentPositions[i] - endPositions[i]) < 1.0)
+			{
+				stop = true;
+			}
+		}
+		pros::delay(10);
+	}
+}
+void move(pros::Motor_Group &drive, float distance)
+{
+	pros::lcd::print(0, "driv");
+	std::vector<double> targetPositions = drive.get_positions();
+	float motor_turn_degrees = inchesToDegrees(distance); /* calc from robot_turn_degrees */
+
+	std::vector<double> endPositions;
+	for (int i = 0; i < targetPositions.size(); i++)
+	{
+		pros::lcd::print(i, "end %d c: %4.2f t: %4.2f", i, targetPositions[i], motor_turn_degrees);
+		endPositions.push_back(targetPositions[i] + motor_turn_degrees);
+	}
+
+	drive.move_relative(motor_turn_degrees, 100);
+
+	int attempts = 0;
+	bool stop = false;
+
+	while (!stop && attempts < 10)
+	{
+		std::vector<double> currentPositions = drive.get_positions();
+		std::vector<double> target = drive.get_target_positions();
+		for (int i = 0; i < currentPositions.size(); i++)
+		{
+			pros::lcd::print(2 + i, "drive %d c: %4.2f e: %4.2f g: %4.2f", i, currentPositions[i], endPositions[i], target[i]);
+			if (fabs(currentPositions[i] - endPositions[i]) < 1.0)
+			{
+				stop = true;
+			}
+		}
+		pros::delay(10);
+	}
+}
+void autonomousOffense()
 {
 	pros::lcd::set_text(1, "yeyyyy");
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 	pros::ADIDigitalOut piston('A');
+	pros::Motor arm(5, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor left_front(4, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor left_back(3, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::Motor right_front(2, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
@@ -128,34 +189,20 @@ void autonomous()
 		right_front,
 		right_back,
 	});
-	
-	/*funny.move_absolute(inchesToDegrees(12.56), 100);
-	turn(funny_left, funny_right, -45);
-	10.25
 
-	turn(funny_left, funny_right, -45);
-
-
-	funny.move_absolute(inchesToDegrees(27.56), 100);
-	drivetrain.turnFor(right, -45, degrees);
-	funny.move_absolute(inchesToDegrees(-6.89), 100);
-	funny.move_absolute(inchesToDegrees(7.87), 100);
-	drivetrain.turnFor(right, 45, degrees);
-	funny.move_absolute(inchesToDegrees(-27.56), 100);
-	drivetrain.turnFor(right, 45, degrees);
-	funny.move_absolute(inchesToDegrees(-19.7), 100);
-	drivetrain.*/
-
-	funny.move_absolute(inchesToDegrees(-80), 100);
-	pros::delay(2000);
+	arm.move_relative(-750, 100);
+	pros::delay(1000);
+	move(funny, -60.0);
 	turn(funny_left, funny_right, 90);
-	/*piston.set_value(true);
-	funny.move_absolute(inchesToDegrees(20), 100);
+	piston.set_value(true);
+	move(funny, -15);
+	move(funny, 15);
 	piston.set_value(false);
-	turn(funny_left, funny_right, -90);
-	funny.move_absolute(inchesToDegrees(60), 100);
-	turn(funny_left, funny_right, -90);
-	funny.move_absolute(inchesToDegrees(-45), 100);*/
+	turn(funny_left, funny_right, 90);
+	arm.move_relative(750, 100);
+	move(funny, -60);
+	turn(funny_left, funny_right, 90);
+	move(funny, -45);
 }
 
 bool myPrint(int16_t line, const char *fmt)
@@ -180,6 +227,67 @@ bool myPrint(int16_t line, const char *fmt)
 
 float power_multiplier = 1.0;
 
+void autonomousDefense()
+{
+	pros::lcd::set_text(1, "yeyyyy");
+	pros::Controller master(pros::E_CONTROLLER_MASTER);
+	pros::ADIDigitalOut piston('A');
+	pros::Motor launcher(10, pros::E_MOTOR_GEAR_RED, true, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor launcher2(9, pros::E_MOTOR_GEAR_RED, false, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor arm(5, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor left_front(4, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor left_back(3, pros::E_MOTOR_GEAR_GREEN, false, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor right_front(2, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor right_back(1, pros::E_MOTOR_GEAR_GREEN, true, pros::E_MOTOR_ENCODER_DEGREES);
+
+	pros::Motor_Group funny({
+		left_front,
+		left_back,
+		right_front,
+		right_back,
+	});
+	pros::Motor_Group funny_left({
+		left_front,
+		left_back,
+	});
+	pros::Motor_Group funny_right({
+		right_front,
+		right_back,
+	});
+	pros::Motor_Group funny_punch({
+		launcher,
+		launcher2,
+	});
+
+	move(funny, 24);
+	turn(funny_left, funny_right, 45);
+	funny_punch.move_relative(400, 100);
+	pros::delay(1500);
+	move(funny, -22);
+	arm.move_relative(-750, 100);
+	pros::delay(2000);
+	turn(funny_left, funny_right, 15);
+	move(funny, 40);
+	arm.move_relative(750, 100);
+	pros::delay(1000);
+	turn(funny_left, funny_right, -90);
+	move(funny, -24);
+	arm.move_relative(-325, 100);
+	pros::delay(2000);
+}
+
+void autonomous()
+{
+	if (auto_offence)
+	{
+		autonomousOffense();
+	}
+	else
+	{
+		autonomousDefense();
+	}
+}
+
 void opcontrol()
 {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -190,12 +298,14 @@ void opcontrol()
 	pros::Motor arm(5);
 	pros::Motor left_sweeper(6);
 	pros::Motor right_sweeper(7);
-	pros::Motor left_wall(8);
-	pros::Motor right_wall(9);
-	pros::Motor wallright(8);
-	pros::Motor wallleft(9);
-	pros::Motor launcher(10, true);
+	pros::Motor launcher(10, pros::E_MOTOR_GEAR_RED, true, pros::E_MOTOR_ENCODER_DEGREES);
+	pros::Motor launcher2(9, pros::E_MOTOR_GEAR_RED, false, pros::E_MOTOR_ENCODER_DEGREES);
 	pros::ADIDigitalOut piston('A');
+
+	pros::Motor_Group funny_punch({
+		launcher,
+		launcher2,
+	});
 
 	bool toggle = false;
 	bool toggle2 = false;
@@ -280,11 +390,11 @@ void opcontrol()
 			punch = !punch;
 			if (punch)
 			{
-				launcher = launcher_power;
+				funny_punch = launcher_power;
 			}
 			else
 			{
-				launcher = launcher_off;
+				funny_punch = launcher_off;
 			}
 		}
 		/*if (master.get_digital(pros::E_CONTROLLER_DIGITAL_UP))
@@ -311,14 +421,6 @@ void opcontrol()
 			wallleft.move_absolute(0, 35);
 			pros::lcd::print(5, "wall down");
 			pros::delay(20);*/
-		}
-
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT))
-		{
-			wallright.move_absolute(50, 110);
-			wallleft.move_absolute(50, 110);
-			pros::lcd::print(5, "wall up");
-			pros::delay(20);
 		}
 
 		int right_power = master.get_analog(ANALOG_RIGHT_Y);
